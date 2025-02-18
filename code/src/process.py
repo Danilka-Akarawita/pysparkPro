@@ -18,6 +18,8 @@ class NewsDataProcessor:
         self.config = config
 
     def _load_data(self) -> DataFrame:
+        
+        """ Load the data from the dataset and return a spark dataframe """ 
         from datasets import load_dataset
         logger.info("Loading AG News dataset")
         dataset=load_dataset(self.config['data']['dataset_name'],split='test')
@@ -28,7 +30,10 @@ class NewsDataProcessor:
         return self.spark.createDataFrame(dataset)
     
     def _process_wordCounts(self,df:DataFrame,target_words:List[str]=None)->DataFrame:
-        logger.info("Processing word counts")
+    
+        """
+        Process word counts from the input dataframe and return a new dataframe with the word counts 
+        """
         df = df.withColumn("clean_description",trim(lower(regexp_replace(col("description"), "[^a-zA-Z\\s]", ""))))
         df = df.withColumn("word", explode(split(col("description"), " ")))
         print("Dataframe:----------------")
@@ -41,11 +46,14 @@ class NewsDataProcessor:
     
     def generate_wordCounts(self, target_words:List[str]=None,all_words:bool=False)->None:
         
-        
+        """
+        Generate word counts for the target words and save the result to the output path as a parquet file
+        """
         df=self._load_data()
         result=self._process_wordCounts(df,target_words)
-        print("Result:---------")
-        result.show()
+        if(all_words):
+            result=result.agg(collect_list("word").alias("words"),collect_list("count").alias("counts"))
+            
         date_str=datetime.now().strftime("%Y-%m-%d")
         filename = f"word_count_all_{date_str}.parquet" if all_words else f"word_count_{date_str}.parquet"
         result.write.parquet(f"{self.config['data']['output_path']}/{filename}",mode="overwrite")
@@ -53,21 +61,22 @@ class NewsDataProcessor:
         word_counts_df.show()
         logger.info(f"Word count data saved to {filename}")
         
-    def generate_wordCountsAll(self, target_words:List[str]=None)->None:
-        logger.info("Generating word counts for all words")
-        df=self._load_data()
-        result=self._process_wordCounts(df,target_words)
-        aggredated_result=result.agg(collect_list("word").alias("words"),collect_list("count").alias("counts"))
+    # def generate_wordCountsAll(self, target_words:List[str]=None)->None:
+    #     logger.info("Generating word counts for all words")
+    #     df=self._load_data()
+    #     result=self._process_wordCounts(df,target_words)
+    #     aggredated_result=result.agg(collect_list("word").alias("words"),collect_list("count").alias("counts"))
         
-        date_str=datetime.now().strftime("%Y-%m-%d")
-        filename = f"word_count_all_{date_str}.parquet"
-        aggredated_result.write.parquet(f"{self.config['data']['output_path']}/{filename}",mode="overwrite")
-        word_counts_df = self.spark.read.parquet(f"{self.config['data']['output_path']}/{filename}")
-        word_counts_df.show()
-        logger.info(f"Word count data saved to {filename}")
+    #     date_str=datetime.now().strftime("%Y-%m-%d")
+    #     filename = f"word_count_all_{date_str}.parquet"
+    #     aggredated_result.write.parquet(f"{self.config['data']['output_path']}/{filename}",mode="overwrite")
+    #     word_counts_df = self.spark.read.parquet(f"{self.config['data']['output_path']}/{filename}")
+    #     word_counts_df.show()
+    #     logger.info(f"Word count data saved to {filename}")
         
     
-    
+    """ Create a spark session  configuration """
+    @staticmethod
     def create_spark_session(config: dict) -> SparkSession:
         spark = SparkSession.builder \
             .appName(config['spark']['app_name']) \
