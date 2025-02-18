@@ -1,0 +1,34 @@
+name: agnewsenv
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.11
+- pyspark
+- pytorch
+- numpy
+- pandas
+- scipy
+- scikit-learn
+- polars
+- orjson
+- pyarrow
+- awswrangler
+- transformers
+- accelerate
+- duckdb
+- s3fs
+- umap-learn
+- smart-open
+- onnxruntime
+- spacy
+- seqeval
+- gensim
+- numba
+- sqlalchemy
+- pytest
+- pip
+- pip:
+  - datasets
+  - huggingface-hub
+  - neo4j

@@ -1,0 +1,32 @@
+FROM debian:12-slim
+
+# Install base dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    bzip2 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+ENV CONDA_DIR /opt/conda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py311_23.11.0-2-Linux-x86_64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -p $CONDA_DIR && \
+    rm miniconda.sh
+
+# Set environment variables
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# Create environment from YAML
+COPY environment.yml .
+RUN conda env create -f environment.yml
+
+# Activate environment and install packages
+SHELL ["conda", "run", "-n", "ag_news", "/bin/bash", "-c"]
+RUN conda install -n ag_news -c conda-forge python=3.11
+
+# Copy code
+WORKDIR /app
+COPY code /app/code
+
+# Set entrypoint
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "ag_news"]

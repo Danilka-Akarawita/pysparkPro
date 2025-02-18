@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+env/
+*.venv
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs and debug files
+logs/
+*.log
+
+# Config and environment files
+*.env
+config.yaml
+
+# Data and output files
+*.parquet
+*.csv
+*.json
+data/
+output/
+
+# Spark temporary files
+spark-warehouse/
+metastore_db/
+.derby/
