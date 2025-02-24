@@ -7,6 +7,9 @@ from datetime import datetime
 import yaml
 import pyspark
 print(pyspark.__version__)
+from huggingface_hub import login
+import os
+from datasets import load_dataset, load_from_disk
 
 
 
@@ -16,23 +19,41 @@ class NewsDataProcessor:
     def __init__(self, spark: SparkSession, config: dict):
         self.spark = spark
         self.config = config
+        self._authenticate_huggingface()
+    
+    def _authenticate_huggingface(self):
+        """Logs in to Hugging Face Hub using an API token"""
+        
+        login(token=self.config['data']['huggingface_token'])
+        logger.info("Authenticated to Hugging Face Hub")
 
     def _load_data(self) -> DataFrame:
+        """Load the data from the dataset and return a Spark DataFrame."""
+        dataset_dir = "/app/datasets/ag_news_test"  # Define dataset directory
         
-        """ Load the data from the dataset and return a spark dataframe """ 
-        from datasets import load_dataset
-        logger.info("Loading AG News dataset")
-        dataset=load_dataset(self.config['data']['dataset_name'],split='test')
-        # Check if dataset is loaded properly
-        print(f"Dataset Type: {type(dataset)}")
-        print(f"Number of Rows: {len(dataset)}")
-        print(f"Sample Row: {dataset[0]}") 
+        # Check if dataset already exists
+        if os.path.exists(dataset_dir) and os.listdir(dataset_dir):
+            logger.info("Loading dataset from local disk")
+            dataset = load_from_disk(dataset_dir)
+        else:
+            logger.info("Downloading dataset from Hugging Face Hub")
+            dataset = load_dataset(self.config['data']['dataset_name'], split='test')
+            dataset.save_to_disk(dataset_dir)  # Save the dataset for reuse
+            
+        
+        # Debugging logs
+            print(f"Dataset Type: {type(dataset)}")
+            print(f"Number of Rows: {len(dataset)}")
+            print(f"Sample Row: {dataset[0]}")
+
         return self.spark.createDataFrame(dataset)
     
     def _process_wordCounts(self,df:DataFrame,target_words:List[str]=None)->DataFrame:
     
         """
-        Process word counts from the input dataframe and return a new dataframe with the word counts 
+        Process the word counts for the target words and return a dataframe
+        Returns:
+            _type_: _description_
         """
         df = df.withColumn("clean_description",trim(lower(regexp_replace(col("description"), "[^a-zA-Z\\s]", ""))))
         df = df.withColumn("word", explode(split(col("description"), " ")))
@@ -44,11 +65,16 @@ class NewsDataProcessor:
             
         return df.groupBy("word").agg(count("word").alias("count"))
     
+    
     def generate_wordCounts(self, target_words:List[str]=None,all_words:bool=False)->None:
         
+        """Generate word counts for the target words and save the result to the output path as a parquet file
+
+        Args:
+            target_words (List[str], optional): _description_. Defaults to None.
+            all_words (bool, optional): _description_. Defaults to False.
         """
-        Generate word counts for the target words and save the result to the output path as a parquet file
-        """
+        print("Generating word counts")
         df=self._load_data()
         result=self._process_wordCounts(df,target_words)
         if(all_words):
@@ -75,7 +101,12 @@ class NewsDataProcessor:
     #     logger.info(f"Word count data saved to {filename}")
         
     
-    """ Create a spark session  configuration """
+        """
+        Create a spark session  configuration
+
+        Returns:
+            _type_: _description_
+        """
     @staticmethod
     def create_spark_session(config: dict) -> SparkSession:
         spark = SparkSession.builder \

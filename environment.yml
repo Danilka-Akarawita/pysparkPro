@@ -1,10 +1,10 @@
-name: agnewsenv
+name: ag_news
 channels:
 - conda-forge
 - defaults
 dependencies:
 - python=3.11
-- pyspark
+- pyspark=3.5.4
 - pytorch
 - numpy
 - pandas
@@ -12,12 +12,13 @@ dependencies:
 - scikit-learn
 - polars
 - orjson
-- pyarrow
+- pyarrow=12.0.1
 - awswrangler
 - transformers
 - accelerate
 - duckdb
 - s3fs
+- nomkl
 - umap-learn
 - smart-open
 - onnxruntime
