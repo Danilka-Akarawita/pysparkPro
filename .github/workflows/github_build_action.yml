@@ -15,6 +15,17 @@ jobs:
       run: |
         docker build -t agnews -f Dockerfile .
     # - name: Save Docker image
+    #   run: |
+    #     docker save -o /tmp/agnews.tar agnews
+
+    - name: login dockerhub
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push Docker image to dockerhub
+      run: |
+          docker push danilka/agnews:latest
+
+    # - name: Save Docker image
     #   uses: actions/upload-artifact@v3
     #   with:
     #     name: agnews
