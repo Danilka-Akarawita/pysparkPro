@@ -11,6 +11,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: login dockerhub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u Danilka_Akarawita --password-stdin
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
     - name: Build Docker image
       run: |
         docker build -t agnews -f Dockerfile .
@@ -18,13 +23,11 @@ jobs:
     #   run: |
     #     docker save -o /tmp/agnews.tar agnews
 
-    - name: login dockerhub
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
 
     - name: Push Docker image to dockerhub
       run: |
-          docker push danilka/agnews:latest
-
+        docker push danilka/agnews:latest
     # - name: Save Docker image
     #   uses: actions/upload-artifact@v3
     #   with:
