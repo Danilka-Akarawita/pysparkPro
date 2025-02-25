@@ -29,22 +29,13 @@ class NewsDataProcessor:
 
     def _load_data(self) -> DataFrame:
         """Load the data from the dataset and return a Spark DataFrame."""
-        dataset_dir = "/app/datasets/ag_news_test"  # Define dataset directory
-        
-        # Check if dataset already exists
-        if os.path.exists(dataset_dir) and os.listdir(dataset_dir):
-            logger.info("Loading dataset from local disk")
-            dataset = load_from_disk(dataset_dir)
-        else:
-            logger.info("Downloading dataset from Hugging Face Hub")
-            dataset = load_dataset(self.config['data']['dataset_name'], split='test')
-            dataset.save_to_disk(dataset_dir)  # Save the dataset for reuse
-            
-        
+        logger.info("Downloading dataset from Hugging Face Hub")
+        dataset = load_dataset(self.config['data']['dataset_name'], split='test')
+
         # Debugging logs
-            print(f"Dataset Type: {type(dataset)}")
-            print(f"Number of Rows: {len(dataset)}")
-            print(f"Sample Row: {dataset[0]}")
+        print(f"Dataset Type: {type(dataset)}")
+        print(f"Number of Rows: {len(dataset)}")
+        print(f"Sample Row: {dataset[0]}")
 
         return self.spark.createDataFrame(dataset)
     

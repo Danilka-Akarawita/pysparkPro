@@ -4,7 +4,7 @@ channels:
 - defaults
 dependencies:
 - python=3.11
-- pyspark=3.5.4
+- pyspark
 - pytorch
 - numpy
 - pandas
@@ -30,6 +30,7 @@ dependencies:
 - pytest
 - pip
 - pip:
-  - datasets
+  - datasets===2.19.1
   - huggingface-hub
+  - fsspec==2023.9.2
   - neo4j

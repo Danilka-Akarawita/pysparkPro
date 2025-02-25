@@ -19,12 +19,6 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     bash miniconda.sh -b -p $CONDA_DIR && \
     rm miniconda.sh
 
-
-# Ensure Conda environment has JAVA_HOME set
-RUN mkdir -p /opt/conda/etc/conda/activate.d
-RUN echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> /opt/conda/etc/conda/activate.d/env_vars.sh
-RUN echo "export PATH=$JAVA_HOME/bin:$PATH" >> /opt/conda/etc/conda/activate.d/env_vars.sh
-
 # Set environment variables
 ENV PATH=$CONDA_DIR/bin:$PATH
 
@@ -32,18 +26,21 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 COPY environment.yml .
 RUN conda env create -f environment.yml
 
-# Ensure conda environment activation works properly
-# RUN echo "source activate ag_news" > ~/.bashrc
+# Make RUN commands use the new environment
+SHELL ["conda", "run", "-n", "ag_news", "/bin/bash", "-c"]
 
-# Activate environment and install packages
-SHELL ["/bin/bash", "-c"]
-
-# Install Python 3.11 into the Conda environment
-RUN source $CONDA_DIR/bin/activate ag_news && conda install -n ag_news -c conda-forge python=3.11
+# Install Python 3.11 explicitly
+RUN conda install -c conda-forge python=3.11
 
 # Copy code
 WORKDIR /app
 COPY code /app/code
 
-# Set entrypoint
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "ag_news"]
+
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl --fail http://localhost:8080/health || exit 1
+
+# Set proper entrypoint
+ENTRYPOINT ["conda", "run", "-n", "ag_news"]
