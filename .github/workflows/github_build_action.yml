@@ -14,9 +14,8 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t agnews -f Dockerfile .
-
-    - name: Save Docker image
-      uses: actions/upload-artifact@v3
-      with:
-        name: ag-news-processor
-        path: /tmp/agnews.tar
+    # - name: Save Docker image
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: agnews
+    #     path: /tmp/agnews.tar
