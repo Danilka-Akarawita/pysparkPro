@@ -27,8 +27,8 @@ jobs:
 
     - name: Push Docker image to dockerhub
       run: |
-        docker tag agnews danilka/agnews:latest
-        docker push danilka/agnews:latest
+        docker tag agnews danilkaakarawita/agnews:latest
+        docker push danilkaakarawita/agnews:latest
     # - name: Save Docker image
     #   uses: actions/upload-artifact@v3
     #   with:
