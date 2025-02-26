@@ -10,20 +10,21 @@ from datasets import load_dataset
 
 logger = logging.getLogger(__name__)
 
-class NewsDataProcessor:
+class AGNewsData:
     def __init__(self, spark: SparkSession, config: dict):
         self.spark = spark
         self.config = config
-        self._authenticate_huggingface()
+        self.authenticate_huggingface()
     
-    def _authenticate_huggingface(self):
+    def authenticate_huggingface(self):
         """Logs in to Hugging Face Hub using an API token"""
         
         login(token=self.config['data']['huggingface_token'])
         logger.info("Authenticated to Hugging Face Hub")
 
-    def _load_data(self) -> DataFrame:
+    def load_data(self) -> DataFrame:
         """Load the data from the dataset and return a Spark DataFrame."""
+        
         logger.info("Downloading dataset from Hugging Face Hub")
         dataset = load_dataset(self.config['data']['dataset_name'], split='test')
 
@@ -34,7 +35,7 @@ class NewsDataProcessor:
 
         return self.spark.createDataFrame(dataset)
     
-    def _process_wordCounts(self,df:DataFrame,target_words:List[str]=None)->DataFrame:
+    def process_wordCounts(self,df:DataFrame,target_words:List[str]=None)->DataFrame:
     
         """
         Process the word counts for the target words and return a dataframe
@@ -65,8 +66,8 @@ class NewsDataProcessor:
             
         """
         logger.debug("Generating word counts")
-        df=self._load_data()
-        result=self._process_wordCounts(df,target_words)
+        df=self.load_data()
+        result=self.process_wordCounts(df,target_words)
         if(all_words):
             result=result.agg(collect_list("word").alias("words"),collect_list("count").alias("counts"))
             

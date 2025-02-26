@@ -1,6 +1,6 @@
 import pytest
 from pyspark.sql import SparkSession
-from process import NewsDataProcessor
+from processAgnews import AGNewsData
 from typing import Dict, Any
 
 @pytest.fixture(scope="session")
@@ -22,10 +22,16 @@ def sample_config():
     }
     
 def test_wordCounts(spark, sample_config):
-    processor = NewsDataProcessor(spark, sample_config)
+    processor = AGNewsData(spark, sample_config)
     test_data=[("president the Asia make","Asia make")]
+    target_words=["president", "the", "Asia"]
     df = processor._load_data()
-    result = processor._process_wordCounts(df, ["president", "the", "Asia"])
+    result = processor._process_wordCounts(df, target_words)
+    word_count=processor.generate_wordCounts(target_words=target_words)
+    #test the count
+    
+    
+    
     counts={row["word"]:row["count"] for row in result.collect()}
     assert counts.get("president") == 1
     assert counts.get("the") == 1

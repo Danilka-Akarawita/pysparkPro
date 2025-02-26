@@ -3,7 +3,7 @@ import yaml
 from typing import Dict, Any
 from pathlib import Path
 import logging
-from process import NewsDataProcessor 
+from processAgnews import AGNewsData 
 
 
 logging.basicConfig(
@@ -53,18 +53,18 @@ def main():
     
     # Load configuration
     config = load_config(args.cfg)
-    spark = NewsDataProcessor.create_spark_session(config)
-    processor = NewsDataProcessor(spark, config)
+    spark = AGNewsData.create_spark_session(config)
+    AGNews= AGNewsData(spark, config)
     
     Path(args.dirout).mkdir(parents=True, exist_ok=True)
     
     if args.command == 'process_data':
-        processor.generate_wordCounts(
+        AGNews.generate_wordCounts(
         target_words=["president", "the", "Asia"],  
         all_words=False
         )
     elif args.command == 'process_data_all':
-        processor.generate_wordCounts(
+        AGNews.generate_wordCounts(
             all_words=True
         )
 

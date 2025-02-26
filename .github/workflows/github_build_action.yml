@@ -19,18 +19,10 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t agnews -f Dockerfile .
-    # - name: Save Docker image
-    #   run: |
-    #     docker save -o /tmp/agnews.tar agnews
-
 
 
     - name: Push Docker image to dockerhub
       run: |
         docker tag agnews danilkaakarawita/agnews:latest
         docker push danilkaakarawita/agnews:latest
-    # - name: Save Docker image
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: agnews
-    #     path: /tmp/agnews.tar
+
