@@ -1,6 +1,6 @@
 data:
   dataset_name: "sh0416/ag_news"
-  output_path: "file:///C:/Users/Dinithi Akarawita/Desktop/AGNewsProcessor/Output"
+  output_path: "file:///C:/AGNewsProcessor/Output"
   huggingface_token: "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"
 
 spark:
