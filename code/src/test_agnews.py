@@ -1,5 +1,6 @@
 import pytest
 from pyspark.sql import SparkSession
+from pyspark.sql import Row
 from processAgnews import AGNewsData
 from typing import Dict, Any
 
@@ -9,6 +10,7 @@ def spark():
 
 @pytest.fixture()
 def sample_config():
+    
     return {
         "spark": {
             "app_name": "AGNewsTest",
@@ -16,25 +18,23 @@ def sample_config():
             "memory": "4g"
         },
         "data": {
-            "input_path": "sh0416/ag_news",
+            "huggingface_token": "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" , 
+            "dataset_name": "ag_news",
             "output_path": "output"
         }
     }
-    
+
 def test_wordCounts(spark, sample_config):
     processor = AGNewsData(spark, sample_config)
-    test_data=[("president the Asia make","Asia make")]
-    target_words=["president", "the", "Asia"]
-    df = processor._load_data()
-    result = processor._process_wordCounts(df, target_words)
-    word_count=processor.generate_wordCounts(target_words=target_words)
-    #test the count
-    
-    
-    
-    counts={row["word"]:row["count"] for row in result.collect()}
-    assert counts.get("president") == 1
+    test_data = [Row(description="A test case for get the test values ")]
+    df = spark.createDataFrame(test_data)
+
+    target_words = ["test", "the", "values"]
+    result = processor.process_wordCounts(df, target_words)
+    counts = {row["word"]: row["count"] for row in result.collect()}
+
+    assert counts.get("values") == 1
     assert counts.get("the") == 1
-    assert counts.get("Asia") == 2
-    print(counts)
-    print("Test passed")
+    assert counts.get("test") == 2
+    
+    print("Test passed with counts:", counts)
